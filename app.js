@@ -168,19 +168,16 @@ function requireAdmin() {
 }
 
 function updateUIForRole() {
-    console.log('Updating UI for role:', currentUser?.role);
-    
-    // Show/hide admin navigation link based on role
     const adminLink = document.getElementById('adminLink');
     if (adminLink) {
         if (isAdmin()) {
-            console.log('Showing admin link for admin user');
-            adminLink.classList.remove('hidden');
+            adminLink.classList.remove('nav-item-hidden');
         } else {
-            console.log('Hiding admin link for regular user');
-            adminLink.classList.add('hidden');
+            adminLink.classList.add('nav-item-hidden');
         }
     }
+}
+
 
     // Show/hide admin dashboard card based on role
     const adminDashboardCard = document.getElementById('adminDashboardCard');
@@ -195,7 +192,7 @@ function updateUIForRole() {
             adminDashboardCard.classList.remove('visible');
         }
     }
-}
+
 
 // Setup event listeners for forms
 function setupEventListeners() {
