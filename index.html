@@ -16,7 +16,7 @@
       <li><a href="#" onclick="showDashboard()">Dashboard</a></li>
       <li><a href="#" onclick="showChallenges()">Challenges</a></li>
       <li><a href="#" onclick="showOverallScore()">Progress</a></li>
-      <li><a href="#" onclick="showAdmin()" id="adminLink" >Admin</a></li>
+      <li><a href="#" onclick="showAdmin()" id="adminLink" class="nav-item-hidden">Admin</a></li>
       <li><a href="#" onclick="logout()">Logout</a></li>
     </ul>
   </nav>
@@ -524,8 +524,8 @@
         <p>You don't have permission to access this area.</p>
         <p>Administrator privileges are required.</p>
         <div class="access-denied-actions">
-          <button class="btn btn--primary btn--lg" onclick="showDashboard()">🏠 Return to Dashboard</button>
-          <button class="btn btn--secondary btn--lg" onclick="logout()">🔒 Login as Admin</button>
+          <button class="btn btn--primary btn--lg" onclick="showDashboard()">Return to Dashboard</button>
+          <button class="btn btn--secondary btn--lg" onclick="logout()">Login as Admin</button>
         </div>
       </div>
     </div>
@@ -548,8 +548,8 @@
           </div>
         </div>
         <div class="thank-you-actions">
-          <button class="btn btn--primary btn--lg" onclick="showDashboard()">🏠 Return to Dashboard</button>
-          <button class="btn btn--secondary btn--lg" onclick="showOverallScore()">📊 View Progress</button>
+          <button class="btn btn--primary btn--lg" onclick="showDashboard()">Return to Dashboard</button>
+          <button class="btn btn--secondary btn--lg" onclick="showOverallScore()">View Progress</button>
         </div>
       </div>
     </div>
