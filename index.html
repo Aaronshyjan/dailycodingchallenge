@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Coding Challenge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar hidden" id="navbar">
+    <div class="brand">Daily Coding Challenge</div>
+    <ul class="nav-list">
+      <li><a href="#" onclick="showDashboard()">Dashboard</a></li>
+      <li><a href="#" onclick="showChallenges()">Challenges</a></li>
+      <li><a href="#" onclick="showOverallScore()">Progress</a></li>
+      <li><a href="#" onclick="showAdmin()" id="adminLink" class="hidden">Admin</a></li>
+      <li><a href="#" onclick="logout()">Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- Login Page -->
+  <div class="page" id="loginPage">
+    <main class="auth-main">
+      <form class="auth-container" id="loginForm">
+        <h2>Welcome Back</h2>
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Email Address</label>
+          <input type="email" class="form-control" id="loginEmail" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">Password</label>
+          <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn--primary btn--full-width">Sign In</button>
+        <div class="auth-footer">
+          <div class="demo-accounts">
+            <p style="font-size: 12px; margin: 16px 0 8px; color: var(--color-text-secondary);">Demo Accounts:</p>
+            <p style="font-size: 11px; margin: 2px 0; color: var(--color-text-secondary);">Admin: admin@dailychallenge.com / admin123</p>
+            <p style="font-size: 11px; margin: 2px 0; color: var(--color-text-secondary);">User: user@example.com / user123</p>
+          </div>
+          Don't have an account? <a href="#" onclick="showSignup()">Create one</a>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <!-- Signup Page -->
+  <div class="page hidden" id="signupPage">
+    <main class="auth-main">
+      <form class="auth-container" id="signupForm">
+        <h2>Create Account</h2>
+        <div class="form-group">
+          <label class="form-label" for="signupName">Full Name</label>
+          <input type="text" class="form-control" id="signupName" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signupEmail">Email Address</label>
+          <input type="email" class="form-control" id="signupEmail" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signupPassword">Password</label>
+          <input type="password" class="form-control" id="signupPassword" placeholder="Create a secure password" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="userRole">Account Type</label>
+          <select class="form-control" id="userRole">
+            <option value="user">Regular User</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn--primary btn--full-width">Create Account</button>
+        <div class="auth-footer">
+          Already have an account? <a href="#" onclick="showLogin()">Sign in</a>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <!-- Dashboard Page -->
+  <div class="page hidden" id="dashboardPage">
+    <div class="container">
+      <header class="dashboard-header">
+        <h1>Welcome back, <span id="userName">User</span>!</h1>
+        <p class="dashboard-subtitle">Ready to tackle today's coding challenge?</p>
+      </header>
+
+      <div class="dashboard-grid">
+        <div class="card dashboard-stat">
+          <div class="card__body">
+            <h3>Current Streak</h3>
+            <div class="stat-number" id="currentStreak">10</div>
+            <p class="stat-label">days strong</p>
+          </div>
+        </div>
+        
+        <div class="card dashboard-stat">
+          <div class="card__body">
+            <h3>Total Score</h3>
+            <div class="stat-number" id="totalScore">325</div>
+            <p class="stat-label">points earned</p>
+          </div>
+        </div>
+        
+        <div class="card dashboard-stat">
+          <div class="card__body">
+            <h3>Challenges Done</h3>
+            <div class="stat-number" id="completedChallenges">10</div>
+            <p class="stat-label">completed</p>
+          </div>
+        </div>
+        
+        <div class="card dashboard-stat">
+          <div class="card__body">
+            <h3>Skill Level</h3>
+            <div class="stat-number">🌟</div>
+            <p class="stat-label">Beginner</p>
+          </div>
+        </div>
+        
+        <div class="card dashboard-stat">
+          <div class="card__body">
+            <h3>Today's Topic</h3>
+            <div class="stat-number">🔄</div>
+            <p class="stat-label">Loops & Functions</p>
+          </div>
+        </div>
+        
+        <div class="card dashboard-stat">
+          <div class="card__body">
+            <h3>Progress</h3>
+            <div class="stat-number">65%</div>
+            <p class="stat-label">overall</p>
+          </div>
+        </div>
+
+        <!-- Admin-only dashboard card -->
+        <div class="card dashboard-stat admin-only hidden" id="adminDashboardCard">
+          <div class="card__body">
+            <h3>Admin Controls</h3>
+            <div class="stat-number">⚙️</div>
+            <p class="stat-label">system management</p>
+            <div class="admin-card-actions">
+              <button class="btn btn--sm btn--primary" onclick="showAdmin()">Open Panel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-actions">
+        <button class="btn btn--primary btn--lg" onclick="showChallenges()">
+          🚀 Start Today's Challenge
+        </button>
+        <button class="btn btn--secondary btn--lg" onclick="showOverallScore()">
+          📊 View Detailed Progress
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Challenge Page -->
+  <div class="page hidden" id="challengePage">
+    <div class="container">
+      <header class="challenge-header">
+        <h2>Today's Challenge</h2>
+        <p class="challenge-date">📅 Date: <span id="todayDate">Tue Sep 09 2025</span></p>
+      </header>
+
+      <div class="challenge-grid">
+        <div class="challenge-section">
+          <div class="card challenge-card">
+            <div class="card__header">
+              <h3>💻 Technical Challenge</h3>
+            </div>
+            <div class="card__body">
+              <div id="technicalChallenge">
+                <p><strong>Write a program in Python to print the following pattern for n=5:</strong></p>
+                <div class="expected-output">
+                  <div class="output-label">Expected Output:</div>
+                  <div class="output-content">
+                    *<br>
+                    * *<br>
+                    * * *<br>
+                    * * * *<br>
+                    * * * * *
+                  </div>
+                </div>
+              </div>
+              <div class="challenge-actions">
+                <button class="btn btn--primary" onclick="openCompiler()">Run Code</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card challenge-card">
+            <div class="card__header">
+              <h3>🧠 Non-Technical MCQ</h3>
+            </div>
+            <div class="card__body">
+              <div id="mcqChallenge">
+                <p><strong>Which of the following is a key benefit of writing clean code?</strong></p>
+                <div class="mcq-options">
+                  <div class="mcq-option">
+                    <input type="radio" name="mcq" id="optA" value="A">
+                    <label for="optA">A. Slower execution</label>
+                  </div>
+                  <div class="mcq-option">
+                    <input type="radio" name="mcq" id="optB" value="B">
+                    <label for="optB">B. Easier maintenance</label>
+                  </div>
+                  <div class="mcq-option">
+                    <input type="radio" name="mcq" id="optC" value="C">
+                    <label for="optC">C. More bugs</label>
+                  </div>
+                  <div class="mcq-option">
+                    <input type="radio" name="mcq" id="optD" value="D">
+                    <label for="optD">D. Less readability</label>
+                  </div>
+                </div>
+              </div>
+              <div class="challenge-actions">
+                <button class="btn btn--primary" onclick="submitMCQ()">Submit Answer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="challenge-sidebar">
+          <div class="card">
+            <div class="card__body">
+              <h4>📈 Daily Progress</h4>
+              <div class="progress-indicator">
+                <div class="progress-item" id="technicalProgress">
+                  <span>💻 Technical Challenge</span>
+                  <span class="status status--info" id="technicalStatus">Pending</span>
+                </div>
+                <div class="progress-item" id="mcqProgress">
+                  <span>🧠 MCQ Challenge</span>
+                  <span class="status status--info" id="mcqStatus">Pending</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__body quote-section">
+              <h4>💡 Daily Inspiration</h4>
+              <div class="quote-icon">👨‍💻</div>
+              <p class="quote">"The best way to learn is to build. The second-best way? Break stuff."</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compiler Page -->
+  <div class="page hidden" id="compilerPage">
+    <div class="container">
+      <header class="compiler-header">
+        <h2>💻 Code Compiler</h2>
+        <button class="btn btn--secondary" onclick="showChallenges()">← Back to Challenge</button>
+      </header>
+
+      <div class="compiler-container">
+        <div class="compiler-controls">
+          <label class="form-label">Programming Language:</label>
+          <select class="form-control compiler-select" id="languageSelect">
+            <option value="python">🐍 Python</option>
+            <option value="javascript">🟨 JavaScript</option>
+            <option value="cpp">⚡ C++</option>
+            <option value="java">☕ Java</option>
+          </select>
+        </div>
+
+        <div class="code-editor">
+          <textarea class="form-control code-textarea" id="codeEditor" placeholder="# Write your Python code here
+for i in range(1, 6):
+    print('* ' * i)"></textarea>
+        </div>
+
+        <div class="compiler-actions">
+          <button class="btn btn--secondary" onclick="runCode()">▶️ Run Code</button>
+          <button class="btn btn--primary" onclick="submitCode()">🚀 Submit Solution</button>
+        </div>
+
+        <div class="output-section">
+          <h4>📤 Output:</h4>
+          <div class="output-display" id="outputDisplay">
+            Run your code to see the output here...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overall Score Page -->
+  <div class="page hidden" id="overallScorePage">
+    <div class="container">
+      <header class="score-header">
+        <h2>📊 Your Progress Dashboard</h2>
+        <p>Track your coding journey and celebrate your achievements</p>
+      </header>
+
+      <div class="score-grid">
+        <div class="card">
+          <div class="card__body">
+            <h3>📈 Score Progression</h3>
+            <div class="chart-container" style="position: relative; height: 300px;">
+              <canvas id="scoreChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__body">
+            <h3>🎯 Challenge Distribution</h3>
+            <div class="chart-container" style="position: relative; height: 300px;">
+              <canvas id="distributionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__body">
+            <h3>⚡ Recent Activity</h3>
+            <div class="activity-list" id="activityList">
+              <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <p>Complete some challenges to see your activity here!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__body">
+            <h3>🏆 Achievements</h3>
+            <div class="achievement-grid">
+              <div class="achievement-item">
+                <div class="achievement-icon">🔥</div>
+                <div class="achievement-text">
+                  <h4>First Steps</h4>
+                  <p>Complete your first coding challenge</p>
+                </div>
+              </div>
+              <div class="achievement-item">
+                <div class="achievement-icon">⚡</div>
+                <div class="achievement-text">
+                  <h4>Speed Runner</h4>
+                  <p>Complete 5 challenges in a week</p>
+                </div>
+              </div>
+              <div class="achievement-item">
+                <div class="achievement-icon">🎯</div>
+                <div class="achievement-text">
+                  <h4>Perfectionist</h4>
+                  <p>Get 10 challenges correct in a row</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div class="page hidden" id="adminPage">
+    <div class="container">
+      <header class="admin-header">
+        <h2>🛠️ Admin Panel</h2>
+        <p>Manage challenges, users, and monitor student progress</p>
+        <div class="admin-access-indicator">
+          <span class="status status--success">✅ Admin Access Verified</span>
+        </div>
+      </header>
+
+      <div class="admin-tabs">
+        <button class="btn btn--secondary tab-btn active" onclick="showAdminTab('challenges')">📝 Challenge Management</button>
+        <button class="btn btn--secondary tab-btn" onclick="showAdminTab('users')">👥 User Management</button>
+        <button class="btn btn--secondary tab-btn" onclick="showAdminTab('reports')">📊 Student Reports</button>
+        <button class="btn btn--secondary tab-btn" onclick="showAdminTab('analytics')">📈 System Analytics</button>
+      </div>
+
+      <div class="admin-content">
+        <!-- Challenge Management Tab -->
+        <div class="admin-tab" id="adminChallenges">
+          <div class="card">
+            <div class="card__header">
+              <h3>➕ Add New Challenge</h3>
+            </div>
+            <div class="card__body">
+              <form id="addChallengeForm">
+                <div class="form-group">
+                  <label class="form-label">Challenge Type</label>
+                  <select class="form-control" id="challengeType">
+                    <option value="technical">💻 Technical (Coding)</option>
+                    <option value="non-technical">🧠 Non-Technical (MCQ)</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Question</label>
+                  <textarea class="form-control" id="challengeQuestion" placeholder="Enter the challenge question..." required></textarea>
+                </div>
+                
+                <div class="form-group" id="optionsGroup" style="display: none;">
+                  <label class="form-label">Options (for MCQ)</label>
+                  <input type="text" class="form-control" id="optionA" placeholder="Option A" style="margin-bottom: 8px;">
+                  <input type="text" class="form-control" id="optionB" placeholder="Option B" style="margin-bottom: 8px;">
+                  <input type="text" class="form-control" id="optionC" placeholder="Option C" style="margin-bottom: 8px;">
+                  <input type="text" class="form-control" id="optionD" placeholder="Option D">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Answer/Solution</label>
+                  <textarea class="form-control" id="challengeAnswer" placeholder="Enter the correct answer or solution..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Challenge Date</label>
+                  <input type="date" class="form-control" id="challengeDate" required>
+                </div>
+                
+                <button type="submit" class="btn btn--primary">✨ Add Challenge</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Management Tab -->
+        <div class="admin-tab hidden" id="adminUsers">
+          <div class="card">
+            <div class="card__header">
+              <h3>👥 User Management</h3>
+            </div>
+            <div class="card__body">
+              <div class="user-management-controls">
+                <button class="btn btn--primary btn--sm" onclick="loadAllUsers()">🔄 Refresh User List</button>
+                <button class="btn btn--secondary btn--sm" onclick="exportUserData()">📥 Export Data</button>
+              </div>
+              <div class="users-list" id="usersList">
+                <div class="empty-state">
+                  <div class="empty-icon">👥</div>
+                  <p>Loading users...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Reports Tab -->
+        <div class="admin-tab hidden" id="adminReports">
+          <div class="card">
+            <div class="card__header">
+              <h3>👨‍🎓 Student Performance Reports</h3>
+            </div>
+            <div class="card__body">
+              <div class="reports-filters">
+                <div class="form-group" style="max-width: 200px; display: inline-block; margin-right: 16px;">
+                  <label class="form-label">Filter by Period</label>
+                  <select class="form-control" id="reportPeriod">
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="all">All Time</option>
+                  </select>
+                </div>
+                <button class="btn btn--secondary btn--sm" onclick="generateReports()">📊 Generate Report</button>
+              </div>
+              <div class="reports-list" id="reportsList">
+                <div class="empty-state">
+                  <div class="empty-icon">👨‍🎓</div>
+                  <p>Loading student reports...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Analytics Tab -->
+        <div class="admin-tab hidden" id="adminAnalytics">
+          <div class="card">
+            <div class="card__header">
+              <h3>📈 System Analytics</h3>
+            </div>
+            <div class="card__body">
+              <div class="analytics-grid">
+                <div class="analytics-card">
+                  <h4>📊 Total Users</h4>
+                  <div class="analytics-number" id="totalUsers">0</div>
+                </div>
+                <div class="analytics-card">
+                  <h4>✅ Active Today</h4>
+                  <div class="analytics-number" id="activeToday">0</div>
+                </div>
+                <div class="analytics-card">
+                  <h4>🎯 Challenges Created</h4>
+                  <div class="analytics-number" id="totalChallenges">0</div>
+                </div>
+                <div class="analytics-card">
+                  <h4>📈 Completion Rate</h4>
+                  <div class="analytics-number" id="completionRate">0%</div>
+                </div>
+              </div>
+              <div class="chart-container" style="position: relative; height: 300px; margin-top: 24px;">
+                <canvas id="adminChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Access Denied Page -->
+  <div class="page hidden" id="accessDeniedPage">
+    <div class="container">
+      <div class="access-denied-content">
+        <div class="access-denied-icon">🚫</div>
+        <h1>Access Denied</h1>
+        <p>You don't have permission to access this area.</p>
+        <p>Administrator privileges are required.</p>
+        <div class="access-denied-actions">
+          <button class="btn btn--primary btn--lg" onclick="showDashboard()">🏠 Return to Dashboard</button>
+          <button class="btn btn--secondary btn--lg" onclick="logout()">🔒 Login as Admin</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thank You Page -->
+  <div class="page hidden" id="thankYouPage">
+    <div class="container">
+      <div class="thank-you-content">
+        <h1>🎉 Congratulations!</h1>
+        <p>You've successfully completed today's challenge!</p>
+        <div class="completion-stats">
+          <div class="stat">
+            <h3 id="earnedPoints">20</h3>
+            <p>Points Earned</p>
+          </div>
+          <div class="stat">
+            <h3 id="newStreak">11</h3>
+            <p>Current Streak</p>
+          </div>
+        </div>
+        <div class="thank-you-actions">
+          <button class="btn btn--primary btn--lg" onclick="showDashboard()">🏠 Return to Dashboard</button>
+          <button class="btn btn--secondary btn--lg" onclick="showOverallScore()">📊 View Progress</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
