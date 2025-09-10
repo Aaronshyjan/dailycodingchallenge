@@ -748,9 +748,12 @@ select.form-control {
   display: block;
 }
 .hidden {
-  display: none ;
+  display: none !important;
 }
 
+.nav-item-hidden {
+  display: none; /* no !important */
+}
 /* Accessibility */
 .sr-only {
   position: absolute;
