@@ -374,7 +374,7 @@ function handleSignup() {
     };
     localStorage.setItem(`progress_${newUser.id}`, JSON.stringify(progress));
     
-    alert(' Account created successfully! Please sign in with your credentials.');
+    alert('🎉 Account created successfully! Please sign in with your credentials.');
     
     // Clear the form
     nameInput.value = '';
@@ -411,42 +411,48 @@ function logout() {
 // Navigation functions
 function showPage(pageId) {
     console.log('Navigating to page:', pageId);
-
+    
     // Hide all pages
     const pages = document.querySelectorAll('.page');
-    pages.forEach(page => page.classList.add('hidden'));
-
-    // Show the target page
+    pages.forEach(page => {
+        page.classList.add('hidden');
+    });
+    
+    // Show selected page
     const targetPage = document.getElementById(pageId);
-    if (!targetPage) {
+    if (targetPage) {
+        targetPage.classList.remove('hidden');
+        console.log('Page displayed successfully:', pageId);
+    } else {
         console.error('Page not found:', pageId);
         return false;
     }
-    targetPage.classList.remove('hidden');
-    currentPage = pageId;
-
-    // Handle navbar visibility
+    
+    // Show/hide navbar based on page
     const navbar = document.getElementById('navbar');
     if (navbar) {
         if (pageId === 'loginPage' || pageId === 'signupPage') {
             navbar.classList.add('hidden');
         } else {
+            // Only show navbar if user is authenticated
             if (currentUser) {
                 navbar.classList.remove('hidden');
                 updateUIForRole();
             } else {
                 navbar.classList.add('hidden');
-                // Redirect to login if user is not authenticated
-                setTimeout(() => showLogin(), 100);
-                return false;
+                // Redirect to login if trying to access protected pages
+                if (pageId !== 'loginPage' && pageId !== 'signupPage') {
+                    console.log('Redirecting unauthenticated user to login');
+                    setTimeout(() => showLogin(), 100);
+                    return false;
+                }
             }
         }
     }
-
+    
+    currentPage = pageId;
     return true;
 }
-
-
 function showLogin() {
     console.log('Showing login page');
     return showPage('loginPage');
