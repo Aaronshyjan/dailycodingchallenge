@@ -307,6 +307,7 @@ html {
   -webkit-font-smoothing: antialiased;
   box-sizing: border-box;
 }
+
 .header {
   background: var(--color-background);
   border-bottom: 2px solid var(--color-light-accent);
@@ -337,30 +338,18 @@ html {
   font-size: var(--font-size-2xl);
   display: inline-block;
 }
-/* Footer */
+/* Footer styling similar to header */
 .footer {
   background: var(--color-background);
   border-top: 2px solid var(--color-light-accent);
   box-shadow: var(--light-shadow-sm);
-  position: sticky; 
+  position: sticky;    /* sticky footer at bottom */
   bottom: 0;
   z-index: 1000;
   padding: var(--space-16) var(--space-24);
   display: flex;
-  justify-content: center; 
+  justify-content: center;  /* centers content */
   align-items: center;
-}
-
-.footer .brand {
-  display: flex;
-  align-items: center;
-  font-weight: 600;
-  font-size: var(--font-size-xl);
-  color: var(--color-text);
-  letter-spacing: -0.02em;
-  gap: var(--space-12);
-  cursor: default;
-  user-select: none;
 }
 
 body {
@@ -760,7 +749,7 @@ select.form-control {
   display: block;
 }
 .hidden {
-  display: none !important;;
+  display: none!important;
 }
 
 /* Accessibility */
