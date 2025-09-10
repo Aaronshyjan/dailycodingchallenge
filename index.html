@@ -1,566 +1,1292 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daily Coding Challenge</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-  <!-- Navigation Bar -->
-  <nav class="navbar hidden" id="navbar">
-    <div class="brand">Daily Coding Challenge</div>
-    <ul class="nav-list">
-      <li><a href="#" onclick="showDashboard()">Dashboard</a></li>
-      <li><a href="#" onclick="showChallenges()">Challenges</a></li>
-      <li><a href="#" onclick="showOverallScore()">Progress</a></li>
-      <li><a href="#" onclick="showAdmin()" id="adminLink" class="hidden">Admin</a></li>
-      <li><a href="#" onclick="logout()">Logout</a></li>
-    </ul>
-  </nav>
+// Application state
+let currentUser = null;
+let currentPage = 'loginPage';
+let challenges = [];
+let userProgress = {};
 
-  <!-- Login Page -->
-  <div class="page" id="loginPage">
-     <header class="header">
-    <div class="brand">Daily Coding Challenge</div>
-  </header>
-    <main class="auth-main">
-      <form class="auth-container" id="loginForm">
-        <h2>Welcome Back</h2>
-        <div class="form-group">
-          <label class="form-label" for="loginEmail">Email Address</label>
-          <input type="email" class="form-control" id="loginEmail" placeholder="your@email.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="loginPassword">Password</label>
-          <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required>
-        </div>
-        <button type="submit" class="btn btn--primary btn--full-width">Sign In</button>
-        <div class="auth-footer">
-          <div class="demo-accounts">
-            <p style="font-size: 12px; margin: 16px 0 8px; color: var(--color-text-secondary);">Demo Accounts:</p>
-            <p style="font-size: 11px; margin: 2px 0; color: var(--color-text-secondary);">Admin: admin@dailychallenge.com / admin123</p>
-            <p style="font-size: 11px; margin: 2px 0; color: var(--color-text-secondary);">User: user@example.com / user123</p>
-          </div>
-          Don't have an account? <a href="#" onclick="showSignup()">Create one</a>
-        </div>
-      </form>
-    </main>
-  </div>
+// Initialize application when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Daily Coding Challenge App initializing...');
+    initializeDemoData();
+    initializeApp();
+    setupEventListeners();
+    
+    // Make functions available globally for onclick handlers
+    setupGlobalFunctions();
+});
 
-  <!-- Signup Page -->
-  <div class="page hidden" id="signupPage">
-     <header class="header">
-    <div class="brand">Daily Coding Challenge</div>
-  </header>
-    <main class="auth-main">
-      <form class="auth-container" id="signupForm">
-        <h2>Create Account</h2>
-        <div class="form-group">
-          <label class="form-label" for="signupName">Full Name</label>
-          <input type="text" class="form-control" id="signupName" placeholder="Your full name" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="signupEmail">Email Address</label>
-          <input type="email" class="form-control" id="signupEmail" placeholder="your@email.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="signupPassword">Password</label>
-          <input type="password" class="form-control" id="signupPassword" placeholder="Create a secure password" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="userRole">Account Type</label>
-          <select class="form-control" id="userRole">
-            <option value="user">Regular User</option>
-            <option value="admin">Administrator</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn--primary btn--full-width">Create Account</button>
-        <div class="auth-footer">
-          Already have an account? <a href="#" onclick="showLogin()">Sign in</a>
-        </div>
-      </form>
-    </main>
-  </div>
+// Make all functions available globally for onclick handlers
+function setupGlobalFunctions() {
+    window.showLogin = showLogin;
+    window.showSignup = showSignup;
+    window.showDashboard = showDashboard;
+    window.showChallenges = showChallenges;
+    window.showOverallScore = showOverallScore;
+    window.showAdmin = showAdmin;
+    window.logout = logout;
+    window.openCompiler = openCompiler;
+    window.runCode = runCode;
+    window.submitCode = submitCode;
+    window.submitMCQ = submitMCQ;
+    window.showAdminTab = showAdminTab;
+    window.loadAllUsers = loadAllUsers;
+    window.exportUserData = exportUserData;
+    window.generateReports = generateReports;
+    window.changeUserRole = changeUserRole;
+    
+    console.log('Global functions exposed successfully');
+}
 
-  <!-- Dashboard Page -->
-  <div class="page hidden" id="dashboardPage">
-    <div class="container">
-      <header class="dashboard-header">
-        <h1>Welcome back, <span id="userName">User</span>!</h1>
-        <p class="dashboard-subtitle">Ready to tackle today's coding challenge?</p>
-      </header>
+// Initialize demo data and users
+function initializeDemoData() {
+    // Create demo users with proper roles
+    const demoUsers = [
+        {
+            id: 1,
+            name: 'Admin User',
+            email: 'admin@dailychallenge.com',
+            password: 'admin123',
+            role: 'admin',
+            createdAt: new Date('2025-09-01').toISOString()
+        },
+        {
+            id: 2,
+            name: 'Regular User',
+            email: 'user@example.com',
+            password: 'user123',
+            role: 'user',
+            createdAt: new Date('2025-09-02').toISOString()
+        },
+        {
+            id: 3,
+            name: 'John Doe',
+            email: 'john@example.com',
+            password: 'demo123',
+            role: 'user',
+            createdAt: new Date('2025-09-03').toISOString()
+        }
+    ];
 
-      <div class="dashboard-grid">
-        <div class="card dashboard-stat">
-          <div class="card__body">
-            <h3>Current Streak</h3>
-            <div class="stat-number" id="currentStreak">10</div>
-            <p class="stat-label">days strong</p>
-          </div>
-        </div>
+    // Initialize users if not exists
+    if (!localStorage.getItem('users')) {
+        localStorage.setItem('users', JSON.stringify(demoUsers));
+        console.log('Demo users created');
+    }
+
+    // Mock challenges based on provided data
+    const mockChallenges = [
+        {
+            id: 1,
+            question: "Write a program in Python to print the following pattern for n=5:",
+            expectedOutput: "*\n* *\n* * *\n* * * *\n* * * * *",
+            answer: "for i in range(1, 6):\n    print('* ' * i)",
+            date: "2025-09-09",
+            category: "technical",
+            type: "coding",
+            difficulty: "Easy",
+            createdBy: "admin@dailychallenge.com"
+        },
+        {
+            id: 2,
+            question: "Which of the following is a key benefit of writing clean code?",
+            options: ["A. Slower execution", "B. Easier maintenance", "C. More bugs", "D. Less readability"],
+            answer: "B",
+            date: "2025-09-09",
+            category: "non-technical",
+            type: "mcq",
+            difficulty: "Easy",
+            createdBy: "admin@dailychallenge.com"
+        }
+    ];
+    
+    // Save to localStorage if not exists
+    if (!localStorage.getItem('challenges')) {
+        localStorage.setItem('challenges', JSON.stringify(mockChallenges));
+    }
+    
+    challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
+    
+    // Initialize progress for demo users
+    demoUsers.forEach(user => {
+        const progressKey = `progress_${user.id}`;
+        if (!localStorage.getItem(progressKey)) {
+            const progress = {
+                totalScore: user.role === 'admin' ? 500 : Math.floor(Math.random() * 400) + 100,
+                completedChallenges: user.role === 'admin' ? 15 : Math.floor(Math.random() * 12) + 3,
+                currentStreak: user.role === 'admin' ? 12 : Math.floor(Math.random() * 8) + 2,
+                lastActivity: new Date().toISOString(),
+                submissions: []
+            };
+            localStorage.setItem(progressKey, JSON.stringify(progress));
+        }
+    });
+    
+    console.log('Demo data initialized');
+}
+
+// Initialize the application
+function initializeApp() {
+    console.log('Checking authentication state...');
+    
+    // Check if user is already logged in
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+            console.log('Found saved user:', currentUser.name, 'Role:', currentUser.role);
+            showDashboard();
+            return;
+        } catch (e) {
+            console.log('Invalid saved user data, clearing...');
+            localStorage.removeItem('currentUser');
+        }
+    }
+    
+    // Always start with login page
+    showLogin();
+    
+    // Set today's date
+    const today = new Date().toDateString();
+    const dateElements = document.querySelectorAll('#todayDate');
+    dateElements.forEach(el => {
+        if (el) el.textContent = today;
+    });
+}
+
+// Role-based access control functions
+function isAdmin() {
+    return currentUser && currentUser.role === 'admin';
+}
+
+function requireAdmin() {
+    if (!isAdmin()) {
+        console.log('Access denied: Admin privileges required');
+        showAccessDenied();
+        return false;
+    }
+    return true;
+}
+
+function updateUIForRole() {
+    console.log('Updating UI for role:', currentUser?.role);
+    
+    // Show/hide admin navigation link based on role
+    const adminLink = document.getElementById('adminLink');
+    if (adminLink) {
+        if (isAdmin()) {
+            console.log('Showing admin link for admin user');
+            adminLink.classList.remove('hidden');
+        } else {
+            console.log('Hiding admin link for regular user');
+            adminLink.classList.add('hidden');
+        }
+    }
+
+    // Show/hide admin dashboard card based on role
+    const adminDashboardCard = document.getElementById('adminDashboardCard');
+    if (adminDashboardCard) {
+        if (isAdmin()) {
+            console.log('Showing admin dashboard card');
+            adminDashboardCard.classList.remove('hidden');
+            adminDashboardCard.classList.add('visible');
+        } else {
+            console.log('Hiding admin dashboard card');
+            adminDashboardCard.classList.add('hidden');
+            adminDashboardCard.classList.remove('visible');
+        }
+    }
+}
+
+// Setup event listeners for forms
+function setupEventListeners() {
+    console.log('Setting up event listeners...');
+    
+    // Login form event listener
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Login form submitted');
+            handleLogin();
+        });
+    }
+
+    // Signup form event listener  
+    const signupForm = document.getElementById('signupForm');
+    if (signupForm) {
+        signupForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Signup form submitted');
+            handleSignup();
+        });
+    }
+
+    // Add challenge form event listener
+    const addChallengeForm = document.getElementById('addChallengeForm');
+    if (addChallengeForm) {
+        addChallengeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Add challenge form submitted');
+            handleAddChallenge();
+        });
+    }
+    
+    // Challenge type selector
+    const challengeTypeSelect = document.getElementById('challengeType');
+    if (challengeTypeSelect) {
+        challengeTypeSelect.addEventListener('change', function(e) {
+            const optionsGroup = document.getElementById('optionsGroup');
+            if (optionsGroup) {
+                optionsGroup.style.display = e.target.value === 'non-technical' ? 'block' : 'none';
+            }
+        });
+    }
+    
+    console.log('Event listeners set up successfully');
+}
+
+// Authentication functions
+function handleLogin() {
+    console.log('Processing login...');
+    
+    const emailInput = document.getElementById('loginEmail');
+    const passwordInput = document.getElementById('loginPassword');
+    
+    if (!emailInput || !passwordInput) {
+        console.error('Login form inputs not found');
+        alert('Form error. Please refresh the page.');
+        return;
+    }
+    
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    
+    console.log('Login attempt for:', email);
+    
+    if (!email || !password) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    // Get users from localStorage
+    let users = [];
+    try {
+        users = JSON.parse(localStorage.getItem('users') || '[]');
+    } catch (e) {
+        console.log('Error parsing users');
+        users = [];
+    }
+    
+    const user = users.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+        console.log('Login successful:', user.name, 'Role:', user.role);
+        currentUser = user;
+        localStorage.setItem('currentUser', JSON.stringify(user));
         
-        <div class="card dashboard-stat">
-          <div class="card__body">
-            <h3>Total Score</h3>
-            <div class="stat-number" id="totalScore">325</div>
-            <p class="stat-label">points earned</p>
-          </div>
-        </div>
+        // Clear the form
+        emailInput.value = '';
+        passwordInput.value = '';
         
-        <div class="card dashboard-stat">
-          <div class="card__body">
-            <h3>Challenges Done</h3>
-            <div class="stat-number" id="completedChallenges">10</div>
-            <p class="stat-label">completed</p>
-          </div>
-        </div>
+        // Navigate to dashboard
+        showDashboard();
+    } else {
+        console.log('Login failed - invalid credentials');
+        alert('Invalid credentials. Try:\nAdmin: admin@dailychallenge.com / admin123\nUser: user@example.com / user123');
+    }
+}
+
+function handleSignup() {
+    console.log('Processing signup...');
+    
+    const nameInput = document.getElementById('signupName');
+    const emailInput = document.getElementById('signupEmail');
+    const passwordInput = document.getElementById('signupPassword');
+    const userRoleInput = document.getElementById('userRole');
+    
+    if (!nameInput || !emailInput || !passwordInput || !userRoleInput) {
+        console.error('Signup form inputs not found');
+        alert('Form error. Please refresh the page.');
+        return;
+    }
+    
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    const role = userRoleInput.value;
+    
+    if (!name || !email || !password) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        alert('Please enter a valid email address');
+        return;
+    }
+    
+    if (password.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return;
+    }
+    
+    // Get existing users
+    let users = [];
+    try {
+        users = JSON.parse(localStorage.getItem('users') || '[]');
+    } catch (e) {
+        console.log('Error parsing users, creating fresh list');
+        users = [];
+    }
+    
+    // Check if user already exists
+    if (users.some(u => u.email === email)) {
+        alert('An account with this email already exists');
+        return;
+    }
+    
+    // Create new user
+    const newUser = {
+        id: Date.now(),
+        name,
+        email,
+        password,
+        role,
+        createdAt: new Date().toISOString()
+    };
+    
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
+    console.log('User created successfully:', newUser.name, 'Role:', newUser.role);
+    
+    // Initialize user progress
+    const progress = {
+        totalScore: 0,
+        completedChallenges: 0,
+        currentStreak: 0,
+        lastActivity: null,
+        submissions: []
+    };
+    localStorage.setItem(`progress_${newUser.id}`, JSON.stringify(progress));
+    
+    alert('🎉 Account created successfully! Please sign in with your credentials.');
+    
+    // Clear the form
+    nameInput.value = '';
+    emailInput.value = '';
+    passwordInput.value = '';
+    userRoleInput.value = 'user';
+    
+    showLogin();
+}
+
+function logout() {
+    console.log('User logging out...');
+    
+    // Clear current user state
+    currentUser = null;
+    
+    // Clear localStorage
+    localStorage.removeItem('currentUser');
+    
+    // Clear any form data
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        if (form.reset) {
+            form.reset();
+        }
+    });
+    
+    // Force page to login state
+    showLogin();
+    
+    console.log('Logout completed successfully');
+}
+
+// Navigation functions
+function showPage(pageId) {
+    console.log('Navigating to page:', pageId);
+
+    // Hide all pages
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(page => page.classList.add('hidden'));
+
+    // Show the target page
+    const targetPage = document.getElementById(pageId);
+    if (!targetPage) {
+        console.error('Page not found:', pageId);
+        return false;
+    }
+    targetPage.classList.remove('hidden');
+    currentPage = pageId;
+
+    // Handle navbar visibility
+    const navbar = document.getElementById('navbar');
+    if (navbar) {
+        if (pageId === 'loginPage' || pageId === 'signupPage') {
+            navbar.classList.add('hidden');
+        } else {
+            if (currentUser) {
+                navbar.classList.remove('hidden');
+                updateUIForRole();
+            } else {
+                navbar.classList.add('hidden');
+                // Redirect to login if user is not authenticated
+                setTimeout(() => showLogin(), 100);
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+
+function showLogin() {
+    console.log('Showing login page');
+    return showPage('loginPage');
+}
+
+function showSignup() {
+    console.log('Showing signup page');
+    return showPage('signupPage');
+}
+
+function showDashboard() {
+    console.log('Showing dashboard');
+    
+    if (!currentUser) {
+        console.log('No authenticated user, redirecting to login');
+        showLogin();
+        return;
+    }
+    
+    if (showPage('dashboardPage')) {
+        updateDashboardStats();
+    }
+}
+
+function showChallenges() {
+    console.log('Showing challenges page');
+    
+    if (!currentUser) {
+        console.log('No authenticated user, redirecting to login');
+        showLogin();
+        return;
+    }
+    
+    if (showPage('challengePage')) {
+        loadTodayChallenges();
+    }
+}
+
+function showOverallScore() {
+    console.log('Showing progress page');
+    
+    if (!currentUser) {
+        console.log('No authenticated user, redirecting to login');
+        showLogin();
+        return;
+    }
+    
+    if (showPage('overallScorePage')) {
+        setTimeout(() => {
+            loadScoreCharts();
+            loadRecentActivity();
+        }, 100);
+    }
+}
+
+function showAdmin() {
+    console.log('Admin access requested');
+    
+    if (!currentUser) {
+        console.log('No authenticated user, redirecting to login');
+        showLogin();
+        return;
+    }
+    
+    if (!requireAdmin()) {
+        return;
+    }
+    
+    console.log('Showing admin panel');
+    if (showPage('adminPage')) {
+        showAdminTab('challenges');
+        loadAdminAnalytics();
+    }
+}
+
+function showAccessDenied() {
+    console.log('Showing access denied page');
+    showPage('accessDeniedPage');
+}
+
+// Dashboard functions
+function updateDashboardStats() {
+    if (!currentUser) return;
+    
+    let progress;
+    try {
+        progress = JSON.parse(localStorage.getItem(`progress_${currentUser.id}`) || '{}');
+    } catch (e) {
+        console.log('Error parsing progress, using defaults');
+        progress = {
+            totalScore: isAdmin() ? 500 : 325,
+            currentStreak: isAdmin() ? 12 : 10,
+            completedChallenges: isAdmin() ? 15 : 10
+        };
+    }
+    
+    const userNameEl = document.getElementById('userName');
+    const currentStreakEl = document.getElementById('currentStreak');
+    const totalScoreEl = document.getElementById('totalScore');
+    const completedChallengesEl = document.getElementById('completedChallenges');
+    
+    if (userNameEl) userNameEl.textContent = currentUser.name;
+    if (currentStreakEl) currentStreakEl.textContent = progress.currentStreak || (isAdmin() ? 12 : 10);
+    if (totalScoreEl) totalScoreEl.textContent = progress.totalScore || (isAdmin() ? 500 : 325);
+    if (completedChallengesEl) completedChallengesEl.textContent = progress.completedChallenges || (isAdmin() ? 15 : 10);
+    
+    console.log('Dashboard stats updated for:', currentUser.role);
+}
+
+// Challenge functions
+function loadTodayChallenges() {
+    console.log('Loading today\'s challenges');
+    updateProgressIndicators();
+}
+
+function updateProgressIndicators() {
+    if (!currentUser) return;
+    
+    let progress;
+    try {
+        progress = JSON.parse(localStorage.getItem(`progress_${currentUser.id}`) || '{}');
+    } catch (e) {
+        console.log('Error parsing progress');
+        progress = {};
+    }
+    
+    const today = new Date().toDateString();
+    
+    // Check if challenges are completed today
+    const todaySubmissions = (progress.submissions || []).filter(s => 
+        new Date(s.submittedAt).toDateString() === today
+    );
+    
+    const technicalCompleted = todaySubmissions.some(s => s.type === 'technical');
+    const mcqCompleted = todaySubmissions.some(s => s.type === 'mcq');
+    
+    const technicalStatusEl = document.getElementById('technicalStatus');
+    const mcqStatusEl = document.getElementById('mcqStatus');
+    
+    if (technicalStatusEl) {
+        technicalStatusEl.textContent = technicalCompleted ? 'Completed' : 'Pending';
+        technicalStatusEl.className = technicalCompleted ? 'status status--success' : 'status status--info';
+    }
+    
+    if (mcqStatusEl) {
+        mcqStatusEl.textContent = mcqCompleted ? 'Completed' : 'Pending';
+        mcqStatusEl.className = mcqCompleted ? 'status status--success' : 'status status--info';
+    }
+}
+
+function submitMCQ() {
+    console.log('Submitting MCQ answer');
+    const selected = document.querySelector('input[name="mcq"]:checked');
+    if (!selected) {
+        alert('Please select an answer before submitting.');
+        return;
+    }
+    
+    const today = new Date().toDateString();
+    const mcqChallenge = challenges.find(c => 
+        c.category === 'non-technical' && new Date(c.date).toDateString() === today
+    );
+    
+    if (!mcqChallenge) {
+        alert('No MCQ challenge found for today.');
+        return;
+    }
+    
+    const isCorrect = selected.value === mcqChallenge.answer;
+    const points = isCorrect ? 10 : 0;
+    
+    console.log('MCQ result:', { selected: selected.value, correct: mcqChallenge.answer, isCorrect, points });
+    
+    // Update user progress
+    let progress;
+    try {
+        progress = JSON.parse(localStorage.getItem(`progress_${currentUser.id}`) || '{}');
+    } catch (e) {
+        progress = {};
+    }
+    
+    progress.totalScore = (progress.totalScore || 0) + points;
+    progress.submissions = progress.submissions || [];
+    
+    // Check if already submitted today
+    const alreadySubmitted = progress.submissions.some(s => 
+        s.challengeId === mcqChallenge.id && 
+        new Date(s.submittedAt).toDateString() === today
+    );
+    
+    if (alreadySubmitted) {
+        alert('You have already submitted this challenge today.');
+        return;
+    }
+    
+    progress.submissions.push({
+        challengeId: mcqChallenge.id,
+        type: 'mcq',
+        answer: selected.value,
+        isCorrect,
+        points,
+        submittedAt: new Date().toISOString()
+    });
+    
+    // Update completed challenges if this is the first submission today
+    const todaySubmissions = progress.submissions.filter(s => 
+        new Date(s.submittedAt).toDateString() === today
+    );
+    
+    if (todaySubmissions.length === 1) {
+        progress.completedChallenges = (progress.completedChallenges || 0) + 1;
+        progress.currentStreak = (progress.currentStreak || 0) + 1;
+    }
+    
+    localStorage.setItem(`progress_${currentUser.id}`, JSON.stringify(progress));
+    
+    if (isCorrect) {
+        alert('🎉 Excellent! That\'s the correct answer. You earned 10 points!');
+    } else {
+        alert(`❌ Not quite right. The correct answer is ${mcqChallenge.answer}. Keep learning!`);
+    }
+    
+    updateProgressIndicators();
+    updateDashboardStats();
+}
+
+// Compiler functions
+function openCompiler() {
+    console.log('Opening code compiler');
+    if (showPage('compilerPage')) {
+        // Set default code template
+        const codeEditor = document.getElementById('codeEditor');
+        if (codeEditor) {
+            codeEditor.value = '# Write your Python code here\nfor i in range(1, 6):\n    print("* " * i)';
+        }
+    }
+}
+
+function runCode() {
+    console.log('Running code simulation');
+    const codeEditor = document.getElementById('codeEditor');
+    
+    if (!codeEditor) {
+        alert('Code editor not found. Please refresh the page.');
+        return;
+    }
+    
+    const code = codeEditor.value;
+    
+    if (!code.trim()) {
+        alert('Please write some code first.');
+        return;
+    }
+    
+    // Simulate code execution
+    const output = simulateCodeExecution(code);
+    const outputDisplay = document.getElementById('outputDisplay');
+    if (outputDisplay) {
+        outputDisplay.textContent = output;
+    }
+    
+    alert('✅ Code executed! Check the output below.');
+}
+
+function simulateCodeExecution(code) {
+    console.log('Simulating code execution');
+    // Simple pattern simulation
+    const expectedPattern = [
+        '*',
+        '* *',
+        '* * *',
+        '* * * *',
+        '* * * * *'
+    ];
+    
+    // Check if code contains pattern generation logic
+    const hasLoop = code.includes('for') || code.includes('while') || code.includes('range');
+    const hasPrint = code.includes('print') || code.includes('cout') || code.includes('console.log') || code.includes('System.out');
+    
+    if (hasLoop && hasPrint) {
+        return expectedPattern.join('\n');
+    } else {
+        return 'Error: Code does not seem to generate the expected pattern.\nPlease check your logic and try again.\n\nHint: You need a loop and print statements.';
+    }
+}
+
+function submitCode() {
+    console.log('Submitting code solution');
+    const codeEditor = document.getElementById('codeEditor');
+    
+    if (!codeEditor) {
+        alert('Code editor not found. Please refresh the page.');
+        return;
+    }
+    
+    const code = codeEditor.value;
+    
+    if (!code.trim()) {
+        alert('Please write some code first.');
+        return;
+    }
+    
+    // Run the code first
+    const output = simulateCodeExecution(code);
+    
+    // Check if output is correct
+    const expectedPattern = '*\n* *\n* * *\n* * * *\n* * * * *';
+    const isCorrect = output === expectedPattern;
+    const points = isCorrect ? 20 : 5;
+    
+    console.log('Code submission result:', { isCorrect, points });
+    
+    // Update user progress
+    let progress;
+    try {
+        progress = JSON.parse(localStorage.getItem(`progress_${currentUser.id}`) || '{}');
+    } catch (e) {
+        progress = {};
+    }
+    
+    const today = new Date().toDateString();
+    const technicalChallenge = challenges.find(c => 
+        c.category === 'technical' && new Date(c.date).toDateString() === today
+    );
+    
+    if (!technicalChallenge) {
+        alert('No technical challenge found for today.');
+        return;
+    }
+    
+    progress.totalScore = (progress.totalScore || 0) + points;
+    progress.submissions = progress.submissions || [];
+    progress.submissions.push({
+        challengeId: technicalChallenge.id,
+        type: 'technical',
+        code,
+        output,
+        isCorrect,
+        points,
+        submittedAt: new Date().toISOString()
+    });
+    
+    localStorage.setItem(`progress_${currentUser.id}`, JSON.stringify(progress));
+    
+    if (isCorrect) {
+        alert(`🎉 Outstanding work! Your code produces the perfect pattern. You earned ${points} points!`);
+    } else {
+        alert(`💡 Good effort! Your code runs but doesn't match the expected pattern exactly. You earned ${points} points for trying. Keep practicing!`);
+    }
+    
+    // Go back to challenges page
+    showChallenges();
+}
+
+// Score page functions
+function loadScoreCharts() {
+    console.log('Loading progress charts');
+    
+    try {
+        if (!currentUser) return;
         
-        <div class="card dashboard-stat">
-          <div class="card__body">
-            <h3>Skill Level</h3>
-            <div class="stat-number">🌟</div>
-            <p class="stat-label">Beginner</p>
-          </div>
-        </div>
+        // Score progression chart
+        const scoreCtx = document.getElementById('scoreChart');
+        if (!scoreCtx) {
+            console.error('Score chart canvas not found');
+            return;
+        }
         
-        <div class="card dashboard-stat">
-          <div class="card__body">
-            <h3>Today's Topic</h3>
-            <div class="stat-number">🔄</div>
-            <p class="stat-label">Loops & Functions</p>
-          </div>
-        </div>
+        // Sample data for demo based on user role
+        const isUserAdmin = isAdmin();
+        const scoreData = isUserAdmin ? 
+            [0, 20, 45, 70, 100, 135, 170, 210, 250, 290, 330, 380, 430, 500] :
+            [0, 10, 30, 50, 75, 100, 130, 160, 190, 220, 250, 280, 325];
+        const dates = ['Sep 1', 'Sep 2', 'Sep 3', 'Sep 4', 'Sep 5', 'Sep 6', 'Sep 7', 'Sep 8', 'Sep 9', 'Sep 10', 'Sep 11', 'Sep 12', 'Sep 13'];
         
-        <div class="card dashboard-stat">
-          <div class="card__body">
-            <h3>Progress</h3>
-            <div class="stat-number">65%</div>
-            <p class="stat-label">overall</p>
-          </div>
-        </div>
+        new Chart(scoreCtx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Total Score',
+                    data: scoreData,
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#6366f1',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(99, 102, 241, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(99, 102, 241, 0.1)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        
+        // Challenge distribution chart
+        const distCtx = document.getElementById('distributionChart');
+        if (distCtx) {
+            const techCount = isUserAdmin ? 8 : 6;
+            const mcqCount = isUserAdmin ? 7 : 4;
+            
+            new Chart(distCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Technical Challenges', 'MCQ Challenges'],
+                    datasets: [{
+                        data: [techCount, mcqCount],
+                        backgroundColor: ['#6366f1', '#94a3b8'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error loading charts:', error);
+    }
+}
 
-        <!-- Admin-only dashboard card -->
-        <div class="card dashboard-stat admin-only hidden" id="adminDashboardCard">
-          <div class="card__body">
-            <h3>Admin Controls</h3>
-            <div class="stat-number">⚙️</div>
-            <p class="stat-label">system management</p>
-            <div class="admin-card-actions">
-              <button class="btn btn--sm btn--primary" onclick="showAdmin()">Open Panel</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="dashboard-actions">
-        <button class="btn btn--primary btn--lg" onclick="showChallenges()">
-          🚀 Start Today's Challenge
-        </button>
-        <button class="btn btn--secondary btn--lg" onclick="showOverallScore()">
-          📊 View Detailed Progress
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Challenge Page -->
-  <div class="page hidden" id="challengePage">
-    <div class="container">
-      <header class="challenge-header">
-        <h2>Today's Challenge</h2>
-        <p class="challenge-date">📅 Date: <span id="todayDate">Tue Sep 09 2025</span></p>
-      </header>
-
-      <div class="challenge-grid">
-        <div class="challenge-section">
-          <div class="card challenge-card">
-            <div class="card__header">
-              <h3>💻 Technical Challenge</h3>
-            </div>
-            <div class="card__body">
-              <div id="technicalChallenge">
-                <p><strong>Write a program in Python to print the following pattern for n=5:</strong></p>
-                <div class="expected-output">
-                  <div class="output-label">Expected Output:</div>
-                  <div class="output-content">
-                    *<br>
-                    * *<br>
-                    * * *<br>
-                    * * * *<br>
-                    * * * * *
-                  </div>
+function loadRecentActivity() {
+    if (!currentUser) return;
+    
+    const activityList = document.getElementById('activityList');
+    if (!activityList) return;
+    
+    // Sample activity data based on user role
+    const isUserAdmin = isAdmin();
+    const sampleActivity = isUserAdmin ? [
+        { type: 'technical', isCorrect: true, points: 20, date: 'Sep 9, 2025' },
+        { type: 'mcq', isCorrect: true, points: 10, date: 'Sep 8, 2025' },
+        { type: 'technical', isCorrect: true, points: 20, date: 'Sep 7, 2025' },
+        { type: 'mcq', isCorrect: true, points: 10, date: 'Sep 6, 2025' },
+        { type: 'technical', isCorrect: true, points: 20, date: 'Sep 5, 2025' }
+    ] : [
+        { type: 'technical', isCorrect: true, points: 20, date: 'Sep 9, 2025' },
+        { type: 'mcq', isCorrect: true, points: 10, date: 'Sep 8, 2025' },
+        { type: 'technical', isCorrect: false, points: 5, date: 'Sep 7, 2025' },
+        { type: 'mcq', isCorrect: true, points: 10, date: 'Sep 6, 2025' },
+        { type: 'technical', isCorrect: true, points: 20, date: 'Sep 5, 2025' }
+    ];
+    
+    let html = '';
+    sampleActivity.forEach(activity => {
+        const status = activity.isCorrect ? '✅' : '❌';
+        const type = activity.type === 'technical' ? '💻 Technical Challenge' : '🧠 MCQ Challenge';
+        
+        html += `
+            <div style="padding: 16px; margin-bottom: 12px; background: var(--light-gradient-subtle); border-radius: var(--radius-lg); border: 1px solid var(--color-light-accent);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-weight: 600; color: var(--color-text);">${status} ${type}</span>
+                    <span style="font-size: 12px; color: var(--color-text-secondary);">${activity.date}</span>
                 </div>
-              </div>
-              <div class="challenge-actions">
-                <button class="btn btn--primary" onclick="openCompiler()">Run Code</button>
-              </div>
+                <div style="font-size: 14px; color: var(--color-primary); font-weight: 500;">
+                    +${activity.points} points earned
+                </div>
             </div>
-          </div>
+        `;
+    });
+    
+    activityList.innerHTML = html;
+}
 
-          <div class="card challenge-card">
-            <div class="card__header">
-              <h3>🧠 Non-Technical MCQ</h3>
+// Admin functions
+function showAdminTab(tabName) {
+    if (!requireAdmin()) {
+        return;
+    }
+    
+    console.log('Showing admin tab:', tabName);
+    
+    // Hide all tabs
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+        tab.classList.add('hidden');
+    });
+    
+    // Show selected tab
+    const targetTab = document.getElementById(`admin${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+    if (targetTab) {
+        targetTab.classList.remove('hidden');
+    }
+    
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Add active class to clicked button
+    const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => 
+        btn.textContent.toLowerCase().includes(tabName)
+    );
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+    
+    // Load content based on tab
+    switch(tabName) {
+        case 'users':
+            loadAllUsers();
+            break;
+        case 'reports':
+            loadStudentReports();
+            break;
+        case 'analytics':
+            loadAdminAnalytics();
+            break;
+    }
+}
+
+function handleAddChallenge() {
+    if (!requireAdmin()) {
+        return;
+    }
+    
+    console.log('Adding new challenge');
+    
+    const type = document.getElementById('challengeType').value;
+    const question = document.getElementById('challengeQuestion').value;
+    const answer = document.getElementById('challengeAnswer').value;
+    const date = document.getElementById('challengeDate').value;
+    
+    if (!question || !answer || !date) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    const newChallenge = {
+        id: Date.now(),
+        question,
+        answer,
+        date,
+        category: type,
+        type: type === 'technical' ? 'coding' : 'mcq',
+        createdBy: currentUser.email,
+        createdAt: new Date().toISOString()
+    };
+    
+    if (type === 'non-technical') {
+        const options = [
+            document.getElementById('optionA').value,
+            document.getElementById('optionB').value,
+            document.getElementById('optionC').value,
+            document.getElementById('optionD').value
+        ];
+        
+        if (options.some(opt => !opt.trim())) {
+            alert('Please fill in all MCQ options');
+            return;
+        }
+        
+        newChallenge.options = options;
+    } else {
+        newChallenge.expectedOutput = answer;
+    }
+    
+    challenges.push(newChallenge);
+    localStorage.setItem('challenges', JSON.stringify(challenges));
+    
+    alert('✨ Challenge added successfully!');
+    document.getElementById('addChallengeForm').reset();
+    document.getElementById('optionsGroup').style.display = 'none';
+    
+    // Update analytics
+    loadAdminAnalytics();
+}
+
+function loadAllUsers() {
+    if (!requireAdmin()) {
+        return;
+    }
+    
+    const usersList = document.getElementById('usersList');
+    if (!usersList) return;
+    
+    let users = [];
+    try {
+        users = JSON.parse(localStorage.getItem('users') || '[]');
+    } catch (e) {
+        console.error('Error loading users:', e);
+        users = [];
+    }
+    
+    if (users.length === 0) {
+        usersList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">👥</div>
+                <p>No users found</p>
             </div>
-            <div class="card__body">
-              <div id="mcqChallenge">
-                <p><strong>Which of the following is a key benefit of writing clean code?</strong></p>
-                <div class="mcq-options">
-                  <div class="mcq-option">
-                    <input type="radio" name="mcq" id="optA" value="A">
-                    <label for="optA">A. Slower execution</label>
-                  </div>
-                  <div class="mcq-option">
-                    <input type="radio" name="mcq" id="optB" value="B">
-                    <label for="optB">B. Easier maintenance</label>
-                  </div>
-                  <div class="mcq-option">
-                    <input type="radio" name="mcq" id="optC" value="C">
-                    <label for="optC">C. More bugs</label>
-                  </div>
-                  <div class="mcq-option">
-                    <input type="radio" name="mcq" id="optD" value="D">
-                    <label for="optD">D. Less readability</label>
-                  </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    users.forEach(user => {
+        const progress = JSON.parse(localStorage.getItem(`progress_${user.id}`) || '{}');
+        
+        html += `
+            <div class="user-item">
+                <div class="user-info">
+                    <h4>${user.name}</h4>
+                    <p>📧 ${user.email}</p>
+                    <p>📅 Joined: ${new Date(user.createdAt).toLocaleDateString()}</p>
                 </div>
-              </div>
-              <div class="challenge-actions">
-                <button class="btn btn--primary" onclick="submitMCQ()">Submit Answer</button>
-              </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="user-role ${user.role}">${user.role.toUpperCase()}</span>
+                    <div style="text-align: center; padding: 8px;">
+                        <div style="font-weight: bold; color: var(--color-text);">${progress.totalScore || 0}</div>
+                        <div style="font-size: 12px; color: var(--color-text-secondary);">Score</div>
+                    </div>
+                    <button class="btn btn--sm btn--secondary" onclick="changeUserRole('${user.id}', '${user.role === 'admin' ? 'user' : 'admin'}')">
+                        ${user.role === 'admin' ? 'Make User' : 'Make Admin'}
+                    </button>
+                </div>
             </div>
-          </div>
-        </div>
+        `;
+    });
+    
+    usersList.innerHTML = html;
+}
 
-        <div class="challenge-sidebar">
-          <div class="card">
-            <div class="card__body">
-              <h4>📈 Daily Progress</h4>
-              <div class="progress-indicator">
-                <div class="progress-item" id="technicalProgress">
-                  <span>💻 Technical Challenge</span>
-                  <span class="status status--info" id="technicalStatus">Pending</span>
-                </div>
-                <div class="progress-item" id="mcqProgress">
-                  <span>🧠 MCQ Challenge</span>
-                  <span class="status status--info" id="mcqStatus">Pending</span>
-                </div>
-              </div>
+function changeUserRole(userId, newRole) {
+    if (!requireAdmin()) {
+        return;
+    }
+    
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const userIndex = users.findIndex(u => u.id === parseInt(userId));
+    
+    if (userIndex === -1) {
+        alert('User not found');
+        return;
+    }
+    
+    const user = users[userIndex];
+    const oldRole = user.role;
+    
+    if (confirm(`Change ${user.name}'s role from ${oldRole} to ${newRole}?`)) {
+        users[userIndex].role = newRole;
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        // Update current user if they changed their own role
+        if (currentUser && currentUser.id === parseInt(userId)) {
+            currentUser.role = newRole;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            updateUIForRole();
+        }
+        
+        alert(`✅ ${user.name}'s role changed from ${oldRole} to ${newRole}`);
+        loadAllUsers();
+        loadAdminAnalytics();
+    }
+}
+
+function exportUserData() {
+    if (!requireAdmin()) {
+        return;
+    }
+    
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const dataStr = JSON.stringify(users, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `users_export_${new Date().toISOString().slice(0, 10)}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
+    alert('📥 User data exported successfully!');
+}
+
+function generateReports() {
+    if (!requireAdmin()) {
+        return;
+    }
+    
+    loadStudentReports();
+    alert('📊 Reports generated successfully!');
+}
+
+function loadStudentReports() {
+    if (!requireAdmin()) {
+        return;
+    }
+    
+    const reportsList = document.getElementById('reportsList');
+    if (!reportsList) return;
+    
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const studentUsers = users.filter(u => u.role === 'user');
+    
+    if (studentUsers.length === 0) {
+        reportsList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">👨‍🎓</div>
+                <p>No student users found</p>
             </div>
-          </div>
-
-          <div class="card">
-            <div class="card__body quote-section">
-              <h4>💡 Daily Inspiration</h4>
-              <div class="quote-icon">👨‍💻</div>
-              <p class="quote">"The best way to learn is to build. The second-best way? Break stuff."</p>
+        `;
+        return;
+    }
+    
+    let html = '';
+    studentUsers.forEach(student => {
+        const progress = JSON.parse(localStorage.getItem(`progress_${student.id}`) || '{}');
+        const submissionCount = (progress.submissions || []).length;
+        const avgScore = submissionCount > 0 ? Math.round(progress.totalScore / submissionCount) : 0;
+        
+        html += `
+            <div class="card" style="margin-bottom: 16px;">
+                <div class="card__body">
+                    <h4 style="color: var(--color-text); margin-bottom: 8px;">👨‍💻 ${student.name}</h4>
+                    <p style="color: var(--color-text-secondary); margin-bottom: 16px;">📧 ${student.email}</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px;">
+                        <div style="text-align: center; padding: 12px; background: var(--light-gradient-subtle); border-radius: var(--radius-base); border: 1px solid var(--color-light-accent);">
+                            <div style="font-size: 24px; font-weight: bold; color: var(--color-text);">${progress.totalScore || 0}</div>
+                            <div style="font-size: 12px; color: var(--color-text-secondary);">Total Score</div>
+                        </div>
+                        <div style="text-align: center; padding: 12px; background: var(--light-gradient-subtle); border-radius: var(--radius-base); border: 1px solid var(--color-light-accent);">
+                            <div style="font-size: 24px; font-weight: bold; color: var(--color-text);">${progress.completedChallenges || 0}</div>
+                            <div style="font-size: 12px; color: var(--color-text-secondary);">Completed</div>
+                        </div>
+                        <div style="text-align: center; padding: 12px; background: var(--light-gradient-subtle); border-radius: var(--radius-base); border: 1px solid var(--color-light-accent);">
+                            <div style="font-size: 24px; font-weight: bold; color: var(--color-text);">${progress.currentStreak || 0}</div>
+                            <div style="font-size: 12px; color: var(--color-text-secondary);">Streak</div>
+                        </div>
+                        <div style="text-align: center; padding: 12px; background: var(--light-gradient-subtle); border-radius: var(--radius-base); border: 1px solid var(--color-light-accent);">
+                            <div style="font-size: 24px; font-weight: bold; color: var(--color-text);">${submissionCount}</div>
+                            <div style="font-size: 12px; color: var(--color-text-secondary);">Submissions</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+        `;
+    });
+    
+    reportsList.innerHTML = html;
+}
 
-  <!-- Compiler Page -->
-  <div class="page hidden" id="compilerPage">
-    <div class="container">
-      <header class="compiler-header">
-        <h2>💻 Code Compiler</h2>
-        <button class="btn btn--secondary" onclick="showChallenges()">← Back to Challenge</button>
-      </header>
+function loadAdminAnalytics() {
+    if (!requireAdmin()) {
+        return;
+    }
+    
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
+    
+    // Calculate analytics
+    const totalUsers = users.length;
+    const adminUsers = users.filter(u => u.role === 'admin').length;
+    const regularUsers = users.filter(u => u.role === 'user').length;
+    const activeToday = Math.floor(regularUsers * 0.6); // Simulated
+    const totalChallenges = challenges.length;
+    const completionRate = totalUsers > 0 ? Math.round((activeToday / totalUsers) * 100) : 0;
+    
+    // Update analytics display
+    const totalUsersEl = document.getElementById('totalUsers');
+    const activeTodayEl = document.getElementById('activeToday');
+    const totalChallengesEl = document.getElementById('totalChallenges');
+    const completionRateEl = document.getElementById('completionRate');
+    
+    if (totalUsersEl) totalUsersEl.textContent = totalUsers;
+    if (activeTodayEl) activeTodayEl.textContent = activeToday;
+    if (totalChallengesEl) totalChallengesEl.textContent = totalChallenges;
+    if (completionRateEl) completionRateEl.textContent = `${completionRate}%`;
+    
+    // Load admin chart
+    setTimeout(() => {
+        const adminCtx = document.getElementById('adminChart');
+        if (adminCtx) {
+            new Chart(adminCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Admin Users', 'Regular Users', 'Active Today', 'Total Challenges'],
+                    datasets: [{
+                        label: 'System Statistics',
+                        data: [adminUsers, regularUsers, activeToday, totalChallenges],
+                        backgroundColor: ['#1FB8CD', '#FFC185', '#B4413C', '#5D878F'],
+                        borderColor: ['#1FB8CD', '#FFC185', '#B4413C', '#5D878F'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(99, 102, 241, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(99, 102, 241, 0.1)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+    }, 100);
+}
 
-      <div class="compiler-container">
-        <div class="compiler-controls">
-          <label class="form-label">Programming Language:</label>
-          <select class="form-control compiler-select" id="languageSelect">
-            <option value="python">🐍 Python</option>
-            <option value="javascript">🟨 JavaScript</option>
-            <option value="cpp">⚡ C++</option>
-            <option value="java">☕ Java</option>
-          </select>
-        </div>
-
-        <div class="code-editor">
-          <textarea class="form-control code-textarea" id="codeEditor" placeholder="# Write your Python code here
-for i in range(1, 6):
-    print('* ' * i)"></textarea>
-        </div>
-
-        <div class="compiler-actions">
-          <button class="btn btn--secondary" onclick="runCode()">▶️ Run Code</button>
-          <button class="btn btn--primary" onclick="submitCode()">🚀 Submit Solution</button>
-        </div>
-
-        <div class="output-section">
-          <h4>📤 Output:</h4>
-          <div class="output-display" id="outputDisplay">
-            Run your code to see the output here...
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Overall Score Page -->
-  <div class="page hidden" id="overallScorePage">
-    <div class="container">
-      <header class="score-header">
-        <h2>📊 Your Progress Dashboard</h2>
-        <p>Track your coding journey and celebrate your achievements</p>
-      </header>
-
-      <div class="score-grid">
-        <div class="card">
-          <div class="card__body">
-            <h3>📈 Score Progression</h3>
-            <div class="chart-container" style="position: relative; height: 300px;">
-              <canvas id="scoreChart"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card__body">
-            <h3>🎯 Challenge Distribution</h3>
-            <div class="chart-container" style="position: relative; height: 300px;">
-              <canvas id="distributionChart"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card__body">
-            <h3>⚡ Recent Activity</h3>
-            <div class="activity-list" id="activityList">
-              <div class="empty-state">
-                <div class="empty-icon">📋</div>
-                <p>Complete some challenges to see your activity here!</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card__body">
-            <h3>🏆 Achievements</h3>
-            <div class="achievement-grid">
-              <div class="achievement-item">
-                <div class="achievement-icon">🔥</div>
-                <div class="achievement-text">
-                  <h4>First Steps</h4>
-                  <p>Complete your first coding challenge</p>
-                </div>
-              </div>
-              <div class="achievement-item">
-                <div class="achievement-icon">⚡</div>
-                <div class="achievement-text">
-                  <h4>Speed Runner</h4>
-                  <p>Complete 5 challenges in a week</p>
-                </div>
-              </div>
-              <div class="achievement-item">
-                <div class="achievement-icon">🎯</div>
-                <div class="achievement-text">
-                  <h4>Perfectionist</h4>
-                  <p>Get 10 challenges correct in a row</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Admin Panel -->
-  <div class="page hidden" id="adminPage">
-    <div class="container">
-      <header class="admin-header">
-        <h2>🛠️ Admin Panel</h2>
-        <p>Manage challenges, users, and monitor student progress</p>
-        <div class="admin-access-indicator">
-          <span class="status status--success">✅ Admin Access Verified</span>
-        </div>
-      </header>
-
-      <div class="admin-tabs">
-        <button class="btn btn--secondary tab-btn active" onclick="showAdminTab('challenges')">📝 Challenge Management</button>
-        <button class="btn btn--secondary tab-btn" onclick="showAdminTab('users')">👥 User Management</button>
-        <button class="btn btn--secondary tab-btn" onclick="showAdminTab('reports')">📊 Student Reports</button>
-        <button class="btn btn--secondary tab-btn" onclick="showAdminTab('analytics')">📈 System Analytics</button>
-      </div>
-
-      <div class="admin-content">
-        <!-- Challenge Management Tab -->
-        <div class="admin-tab" id="adminChallenges">
-          <div class="card">
-            <div class="card__header">
-              <h3>➕ Add New Challenge</h3>
-            </div>
-            <div class="card__body">
-              <form id="addChallengeForm">
-                <div class="form-group">
-                  <label class="form-label">Challenge Type</label>
-                  <select class="form-control" id="challengeType">
-                    <option value="technical">💻 Technical (Coding)</option>
-                    <option value="non-technical">🧠 Non-Technical (MCQ)</option>
-                  </select>
-                </div>
-                
-                <div class="form-group">
-                  <label class="form-label">Question</label>
-                  <textarea class="form-control" id="challengeQuestion" placeholder="Enter the challenge question..." required></textarea>
-                </div>
-                
-                <div class="form-group" id="optionsGroup" style="display: none;">
-                  <label class="form-label">Options (for MCQ)</label>
-                  <input type="text" class="form-control" id="optionA" placeholder="Option A" style="margin-bottom: 8px;">
-                  <input type="text" class="form-control" id="optionB" placeholder="Option B" style="margin-bottom: 8px;">
-                  <input type="text" class="form-control" id="optionC" placeholder="Option C" style="margin-bottom: 8px;">
-                  <input type="text" class="form-control" id="optionD" placeholder="Option D">
-                </div>
-                
-                <div class="form-group">
-                  <label class="form-label">Answer/Solution</label>
-                  <textarea class="form-control" id="challengeAnswer" placeholder="Enter the correct answer or solution..." required></textarea>
-                </div>
-                
-                <div class="form-group">
-                  <label class="form-label">Challenge Date</label>
-                  <input type="date" class="form-control" id="challengeDate" required>
-                </div>
-                
-                <button type="submit" class="btn btn--primary">✨ Add Challenge</button>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- User Management Tab -->
-        <div class="admin-tab hidden" id="adminUsers">
-          <div class="card">
-            <div class="card__header">
-              <h3>👥 User Management</h3>
-            </div>
-            <div class="card__body">
-              <div class="user-management-controls">
-                <button class="btn btn--primary btn--sm" onclick="loadAllUsers()">🔄 Refresh User List</button>
-                <button class="btn btn--secondary btn--sm" onclick="exportUserData()">📥 Export Data</button>
-              </div>
-              <div class="users-list" id="usersList">
-                <div class="empty-state">
-                  <div class="empty-icon">👥</div>
-                  <p>Loading users...</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Student Reports Tab -->
-        <div class="admin-tab hidden" id="adminReports">
-          <div class="card">
-            <div class="card__header">
-              <h3>👨‍🎓 Student Performance Reports</h3>
-            </div>
-            <div class="card__body">
-              <div class="reports-filters">
-                <div class="form-group" style="max-width: 200px; display: inline-block; margin-right: 16px;">
-                  <label class="form-label">Filter by Period</label>
-                  <select class="form-control" id="reportPeriod">
-                    <option value="week">This Week</option>
-                    <option value="month">This Month</option>
-                    <option value="all">All Time</option>
-                  </select>
-                </div>
-                <button class="btn btn--secondary btn--sm" onclick="generateReports()">📊 Generate Report</button>
-              </div>
-              <div class="reports-list" id="reportsList">
-                <div class="empty-state">
-                  <div class="empty-icon">👨‍🎓</div>
-                  <p>Loading student reports...</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- System Analytics Tab -->
-        <div class="admin-tab hidden" id="adminAnalytics">
-          <div class="card">
-            <div class="card__header">
-              <h3>📈 System Analytics</h3>
-            </div>
-            <div class="card__body">
-              <div class="analytics-grid">
-                <div class="analytics-card">
-                  <h4>📊 Total Users</h4>
-                  <div class="analytics-number" id="totalUsers">0</div>
-                </div>
-                <div class="analytics-card">
-                  <h4>✅ Active Today</h4>
-                  <div class="analytics-number" id="activeToday">0</div>
-                </div>
-                <div class="analytics-card">
-                  <h4>🎯 Challenges Created</h4>
-                  <div class="analytics-number" id="totalChallenges">0</div>
-                </div>
-                <div class="analytics-card">
-                  <h4>📈 Completion Rate</h4>
-                  <div class="analytics-number" id="completionRate">0%</div>
-                </div>
-              </div>
-              <div class="chart-container" style="position: relative; height: 300px; margin-top: 24px;">
-                <canvas id="adminChart"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Access Denied Page -->
-  <div class="page hidden" id="accessDeniedPage">
-    <div class="container">
-      <div class="access-denied-content">
-        <div class="access-denied-icon">🚫</div>
-        <h1>Access Denied</h1>
-        <p>You don't have permission to access this area.</p>
-        <p>Administrator privileges are required.</p>
-        <div class="access-denied-actions">
-          <button class="btn btn--primary btn--lg" onclick="showDashboard()">🏠 Return to Dashboard</button>
-          <button class="btn btn--secondary btn--lg" onclick="logout()">🔒 Login as Admin</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Thank You Page -->
-  <div class="page hidden" id="thankYouPage">
-    <div class="container">
-      <div class="thank-you-content">
-        <h1>🎉 Congratulations!</h1>
-        <p>You've successfully completed today's challenge!</p>
-        <div class="completion-stats">
-          <div class="stat">
-            <h3 id="earnedPoints">20</h3>
-            <p>Points Earned</p>
-          </div>
-          <div class="stat">
-            <h3 id="newStreak">11</h3>
-            <p>Current Streak</p>
-          </div>
-        </div>
-        <div class="thank-you-actions">
-          <button class="btn btn--primary btn--lg" onclick="showDashboard()">🏠 Return to Dashboard</button>
-          <button class="btn btn--secondary btn--lg" onclick="showOverallScore()">📊 View Progress</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
-</body>
-</html>
+// Initialize everything when script loads
+console.log('App script loaded successfully');
