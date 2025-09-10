@@ -16,14 +16,14 @@
       <li><a href="#" onclick="showDashboard()">Dashboard</a></li>
       <li><a href="#" onclick="showChallenges()">Challenges</a></li>
       <li><a href="#" onclick="showOverallScore()">Progress</a></li>
-      <li><a href="#" onclick="showAdmin()" id="adminLink" class="hidden">Admin</a></li>
+      <li><a href="#" onclick="showAdmin()" id="adminLink" >Admin</a></li>
       <li><a href="#" onclick="logout()">Logout</a></li>
     </ul>
   </nav>
 
   <!-- Login Page -->
   <div class="page" id="loginPage">
-    <header class="header">
+      <header class="header">
     <div class="brand">Daily Coding Challenge</div>
   </header>
     <main class="auth-main">
@@ -39,7 +39,7 @@
         </div>
         <button type="submit" class="btn btn--primary btn--full-width">Sign In</button>
         <div class="auth-footer">
-          
+
           Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a>
         </div>
       </form>
@@ -56,7 +56,7 @@
         <h2>Create Account</h2>
         <div class="form-group">
           <label class="form-label" for="signupName">Full Name</label>
-          <input type="text" class="form-control" id="signupName" placeholder="Your full name" required>
+          <input type="text" class="form-control" id="signupName" placeholder="Enter Your Full Name" required>
         </div>
         <div class="form-group">
           <label class="form-label" for="signupEmail">Email Address</label>
@@ -153,10 +153,10 @@
 
       <div class="dashboard-actions">
         <button class="btn btn--primary btn--lg" onclick="showChallenges()">
-          🚀 Start Today's Challenge
+         Start Today's Challenge
         </button>
         <button class="btn btn--secondary btn--lg" onclick="showOverallScore()">
-          📊 View Detailed Progress
+          View Detailed Progress
         </button>
       </div>
     </div>
@@ -270,26 +270,24 @@
         <div class="compiler-controls">
           <label class="form-label">Programming Language:</label>
           <select class="form-control compiler-select" id="languageSelect">
-            <option value="python">🐍 Python</option>
-            <option value="javascript">🟨 JavaScript</option>
-            <option value="cpp">⚡ C++</option>
-            <option value="java">☕ Java</option>
+            <option value="python"> Python</option>
+            <option value="javascript">JavaScript</option>
+            <option value="cpp">C++</option>
+            <option value="java">Java</option>
           </select>
         </div>
 
         <div class="code-editor">
-          <textarea class="form-control code-textarea" id="codeEditor" placeholder="# Write your Python code here
-for i in range(1, 6):
-    print('* ' * i)"></textarea>
+          <textarea class="form-control code-textarea" id="codeEditor" placeholder="# Write code here"></textarea>
         </div>
 
         <div class="compiler-actions">
-          <button class="btn btn--secondary" onclick="runCode()">▶️ Run Code</button>
-          <button class="btn btn--primary" onclick="submitCode()">🚀 Submit Solution</button>
+          <button class="btn btn--secondary" onclick="runCode()">Run Code</button>
+          <button class="btn btn--primary" onclick="submitCode()">Submit Solution</button>
         </div>
 
         <div class="output-section">
-          <h4>📤 Output:</h4>
+          <h4>Output:</h4>
           <div class="output-display" id="outputDisplay">
             Run your code to see the output here...
           </div>
@@ -302,7 +300,7 @@ for i in range(1, 6):
   <div class="page hidden" id="overallScorePage">
     <div class="container">
       <header class="score-header">
-        <h2>📊 Your Progress Dashboard</h2>
+        <h2>Your Progress Dashboard</h2>
         <p>Track your coding journey and celebrate your achievements</p>
       </header>
 
