@@ -374,7 +374,7 @@ function handleSignup() {
     };
     localStorage.setItem(`progress_${newUser.id}`, JSON.stringify(progress));
     
-    alert('🎉 Account created successfully! Please sign in with your credentials.');
+    alert(' Account created successfully! Please sign in with your credentials.');
     
     // Clear the form
     nameInput.value = '';
