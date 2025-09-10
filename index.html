@@ -23,12 +23,16 @@
 
   <!-- Login Page -->
   <div class="page" id="loginPage">
+    <header class="header">
+  <div class="brand">Daily Coding Challenge</div>
+</header>
+
     <main class="auth-main">
       <form class="auth-container" id="loginForm">
         <h2>Welcome Back</h2>
         <div class="form-group">
           <label class="form-label" for="loginEmail">Email Address</label>
-          <input type="email" class="form-control" id="loginEmail" placeholder="your@email.com" required>
+          <input type="email" class="form-control" id="loginEmail" placeholder="Enter your Email Address" required>
         </div>
         <div class="form-group">
           <label class="form-label" for="loginPassword">Password</label>
@@ -36,12 +40,8 @@
         </div>
         <button type="submit" class="btn btn--primary btn--full-width">Sign In</button>
         <div class="auth-footer">
-          <div class="demo-accounts">
-            <p style="font-size: 12px; margin: 16px 0 8px; color: var(--color-text-secondary);">Demo Accounts:</p>
-            <p style="font-size: 11px; margin: 2px 0; color: var(--color-text-secondary);">Admin: admin@dailychallenge.com / admin123</p>
-            <p style="font-size: 11px; margin: 2px 0; color: var(--color-text-secondary);">User: user@example.com / user123</p>
-          </div>
-          Don't have an account? <a href="#" onclick="showSignup()">Create one</a>
+         
+          Don't have an account? <a href="#" onclick="showSignup()">Sign Up</a>
         </div>
       </form>
     </main>
@@ -49,6 +49,10 @@
 
   <!-- Signup Page -->
   <div class="page hidden" id="signupPage">
+    <header class="header">
+  <div class="brand">Daily Coding Challenge</div>
+</header>
+
     <main class="auth-main">
       <form class="auth-container" id="signupForm">
         <h2>Create Account</h2>
@@ -276,10 +280,7 @@
         </div>
 
         <div class="code-editor">
-          <textarea class="form-control code-textarea" id="codeEditor" placeholder="# Write your Python code here
-for i in range(1, 6):
-    print('* ' * i)"></textarea>
-        </div>
+          <textarea class="form-control code-textarea" id="codeEditor" placeholder="# Write code here"></textarea></div>
 
         <div class="compiler-actions">
           <button class="btn btn--secondary" onclick="runCode()">▶️ Run Code</button>
@@ -554,7 +555,9 @@ for i in range(1, 6):
       </div>
     </div>
   </div>
-
+<footer class="footer">
+  <div class="brand">© 2025 Daily Coding Challenge | Team 3</div>
+</footer>
   <script src="app.js"></script>
 </body>
 </html>
